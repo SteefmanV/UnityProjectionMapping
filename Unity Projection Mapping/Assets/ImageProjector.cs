@@ -2,7 +2,6 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using UnityEditor;
 
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
@@ -157,37 +156,5 @@ public class ImageProjector : MonoBehaviour
 
         vert += 4;
         tris += 6;
-    }
-
-    protected virtual void OnSceneGUI()
-    {
-        if (Event.current.type == EventType.Repaint)
-        {
-            //Transform transform = ((DotExample)target).transform;
-            Handles.color = Handles.xAxisColor;
-            Handles.DotHandleCap(
-                0,
-                transform.position + new Vector3(3f, 0f, 0f),
-                transform.rotation * Quaternion.LookRotation(Vector3.right),
-                10,
-                EventType.Repaint
-            );
-            Handles.color = Handles.yAxisColor;
-            Handles.DotHandleCap(
-                0,
-                transform.position + new Vector3(0f, 3f, 0f),
-                transform.rotation * Quaternion.LookRotation(Vector3.up),
-                10,
-                EventType.Repaint
-            );
-            Handles.color = Handles.zAxisColor;
-            Handles.DotHandleCap(
-                0,
-                transform.position + new Vector3(0f, 0f, 3f),
-                transform.rotation * Quaternion.LookRotation(Vector3.forward),
-                10,
-                EventType.Repaint
-            );
-        }
     }
 }
