@@ -26,6 +26,7 @@ struct Rectangle
         pointC = pC;
         pointD = pD;
     }
+        
 
 
     public void DrawGizmoOutline()

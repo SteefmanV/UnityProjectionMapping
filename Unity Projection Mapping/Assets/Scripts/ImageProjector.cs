@@ -30,11 +30,6 @@ public class ImageProjector : MonoBehaviour
         DrawPerspectiveQuad();
     }
 
-    private void Update()
-    {
-       // if(!drawGizmos) DrawPerspectiveQuad();
-    }
-
     private void DrawPerspectiveQuad()
     {
         NullChecks();
@@ -80,9 +75,6 @@ public class ImageProjector : MonoBehaviour
     }
 
 
-
-
-
     void GenerateMesh()
     {
         _mesh.Clear();
@@ -123,7 +115,7 @@ public class ImageProjector : MonoBehaviour
         }
 
         MeshRenderer meshRend = GetComponent<MeshRenderer>();
-        if (GetComponent<MeshRenderer>().material == null)
+        if (GetComponent<MeshRenderer>().sharedMaterial == null)
         {
             meshRend.material = new Material(Shader.Find("Standard"));
         }
