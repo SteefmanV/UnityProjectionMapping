@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System;
-using System.Linq;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshRenderer))]
@@ -9,33 +7,42 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class ImageProjector : MonoBehaviour
 {
-    public bool drawGizmos = false;
-    public int subdevisionIteration = 2;
-    public int quadSize = 0;
 
+    [Header("Corner positions")]
     public Vector3 topLeft = new Vector3(0, 100, 0);
     public Vector3 topRight = new Vector3(100, 100, 0);
     public Vector3 bottomLeft = new Vector3(0, 0, 0);
     public Vector3 bottomRight = new Vector3(100, 0, 0);
-
     public Transform[] dragPoints = new Transform[4];
+
+    [Header("Settings")]
+    [SerializeField] private bool _drawGizmos = false;
+    [SerializeField] private int _subdevisionIteration = 3;
 
     private Mesh _mesh;
     private PolygonCollider2D _collider = null;
+
+    // Mesh data:
     private List<Vector3> _vertices = new List<Vector3>();
     private List<Vector2> _uvs = new List<Vector2>();
     private int[] _triangles;
 
-    private int vert = 0;
-    private int tris = 0;
+    private int _vert = 0;
+    private int _tris = 0;
+    private int _quadSize = 0;
+
 
     private void Awake()
     {
         _collider = GetComponent<PolygonCollider2D>();
-        UpdatePosition();
+        UpdateDragPositions();
     }
 
-    public void UpdatePosition()
+
+    /// <summary>
+    /// Updates the rectangle corner position to the draggable corner positions. 
+    /// </summary>
+    public void UpdateDragPositions()
     {
         topLeft = dragPoints[2].position;
         topRight = dragPoints[0].position;
@@ -46,7 +53,10 @@ public class ImageProjector : MonoBehaviour
     }
 
 
-    public void SetSelected(bool pActive)
+    /// <summary>
+    /// Enabled/Disables the draggable corners
+    /// </summary>
+    public void ToggleSelected(bool pActive)
     {
         foreach (Transform dragPoint in dragPoints)
         {
@@ -61,6 +71,9 @@ public class ImageProjector : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// 1. Creates a rectangle. 2. subdivides rectangle. 3. generate mesh of subdivided rectangle
+    /// </summary>
     private void DrawPerspectiveQuad()
     {
         NullChecks();
@@ -73,9 +86,13 @@ public class ImageProjector : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Subdived the rectangle in 4 new rectangles
+    /// The method is recursive
+    /// </summary>
     private void SubdivideRectangle(Rectangle pRec, Vector2 pUVStart, Vector2 pUVRange, int pIteration)
     {
-        if (pIteration++ >= subdevisionIteration) //if max sub devision, add rectangle to mesh
+        if (pIteration++ >= _subdevisionIteration) //if max sub devision, add rectangle to mesh
         {
             InsertRectangleInMesh(pRec, pUVStart, pUVRange);
             return;
@@ -84,13 +101,13 @@ public class ImageProjector : MonoBehaviour
         Vector3 vanishPoint1 = pRec.getHorizontalVanishPoint();
         Vector3 vanishPoint2 = pRec.getVerticalVanishPoint();
         Vector3 quadCenter = pRec.GetCenter();
-
-        Vector3 intersection1 = Rectangle.LineIntersection(quadCenter, vanishPoint1, pRec.pointA, pRec.pointB);
-        Vector3 intersection2 = Rectangle.LineIntersection(quadCenter, vanishPoint1, pRec.pointC, pRec.pointD);
-        Vector3 intersection3 = Rectangle.LineIntersection(quadCenter, vanishPoint2, pRec.pointB, pRec.pointC);
-        Vector3 intersection4 = Rectangle.LineIntersection(quadCenter, vanishPoint2, pRec.pointA, pRec.pointD);
-
-        if (drawGizmos)
+                                                                                                                    //     V1 = Where line A-D and B-C intersect
+        Vector3 intersection1 = Rectangle.LineIntersection(quadCenter, vanishPoint1, pRec.pointA, pRec.pointB);     // A ------- B                                                                                                                
+        Vector3 intersection2 = Rectangle.LineIntersection(quadCenter, vanishPoint1, pRec.pointC, pRec.pointD);     // | \     / |
+        Vector3 intersection3 = Rectangle.LineIntersection(quadCenter, vanishPoint2, pRec.pointB, pRec.pointC);     // |    O    |  V2 = Where line A-B and C-D intersect
+        Vector3 intersection4 = Rectangle.LineIntersection(quadCenter, vanishPoint2, pRec.pointA, pRec.pointD);     // | /     \ |
+                                                                                                                    // D ------- C
+        if (_drawGizmos)                                                                                               
         {
             Gizmos.color = Color.green;
             Gizmos.DrawLine(intersection1, intersection2);
@@ -98,6 +115,7 @@ public class ImageProjector : MonoBehaviour
             pRec.DrawGizmoOutline();
         }
 
+        // Subdivide rectangle in 4 more rectangles
         Vector2 newUVRange = pUVRange / 2;
         SubdivideRectangle(new Rectangle(pRec.pointA, intersection1, quadCenter, intersection4), new Vector2(pUVStart.x, pUVStart.y + newUVRange.y), newUVRange, pIteration); //Top Left
         SubdivideRectangle(new Rectangle(intersection1, pRec.pointB, intersection3, quadCenter), pUVStart + newUVRange, newUVRange, pIteration); // Top Right
@@ -106,53 +124,10 @@ public class ImageProjector : MonoBehaviour
     }
 
 
-    void GenerateMesh()
-    {
-        _mesh.Clear();
-        _mesh.vertices = _vertices.ToArray();
-        _mesh.triangles = _triangles;
-        _mesh.uv = _uvs.ToArray();
-
-        _mesh.Optimize();
-        _mesh.RecalculateNormals();
-        _mesh.RecalculateBounds();
-    }
-
-
-    private void ResetData()
-    {
-        //Reset transform
-        transform.position = Vector3.zero;
-        transform.localScale = Vector3.one;
-
-        //Clean Data
-        _mesh.Clear();
-        _vertices.Clear();
-        _uvs.Clear();
-        vert = 0;
-        tris = 0;
-
-        //Set new values
-        quadSize = (int)Mathf.Pow(2, subdevisionIteration);
-        _triangles = new int[(quadSize + 1) * (quadSize + 1) * 6];
-    }
-
-    private void NullChecks()
-    {
-        if (_mesh == null)
-        {
-            _mesh = new Mesh();
-            GetComponent<MeshFilter>().mesh = _mesh;
-        }
-
-        MeshRenderer meshRend = GetComponent<MeshRenderer>();
-        if (GetComponent<MeshRenderer>().sharedMaterial == null)
-        {
-            meshRend.material = new Material(Shader.Find("Standard"));
-        }
-    }
-
-
+    /// <summary>
+    /// Adds a rectangle in the mesh
+    /// Sets: vertices, triangles and uv cordinates
+    /// </summary>
     private void InsertRectangleInMesh(Rectangle pRec, Vector2 pUVStart, Vector2 pUVRange)
     {
         // 4 Vertices
@@ -168,25 +143,81 @@ public class ImageProjector : MonoBehaviour
         _uvs.Add(pUVStart);
 
         // Tris 1
-        _triangles[tris + 0] = vert + 0;
-        _triangles[tris + 1] = vert + 1;
-        _triangles[tris + 2] = vert + 2;
+        _triangles[_tris + 0] = _vert + 0;
+        _triangles[_tris + 1] = _vert + 1;
+        _triangles[_tris + 2] = _vert + 2;
 
         // Tris 2
-        _triangles[tris + 3] = vert + 3;
-        _triangles[tris + 4] = vert + 0;
-        _triangles[tris + 5] = vert + 2;
+        _triangles[_tris + 3] = _vert + 3;
+        _triangles[_tris + 4] = _vert + 0;
+        _triangles[_tris + 5] = _vert + 2;
 
-        vert += 4;
-        tris += 6;
+        _vert += 4;
+        _tris += 6;
     }
 
 
+    /// <summary>
+    /// Generates mesh out of mesh data
+    /// </summary>
+    private void GenerateMesh()
+    {
+        _mesh.Clear();
+        _mesh.vertices = _vertices.ToArray();
+        _mesh.triangles = _triangles;
+        _mesh.uv = _uvs.ToArray();
+
+        _mesh.Optimize();
+        _mesh.RecalculateNormals();
+        _mesh.RecalculateBounds();
+    }
+
+
+    /// <summary>
+    /// Resets transform and mesh data
+    /// </summary>
+    private void ResetData()
+    {
+        //Reset transform
+        transform.position = Vector3.zero;
+        transform.localScale = Vector3.one;
+
+        //Clean Data
+        _mesh.Clear();
+        _vertices.Clear();
+        _uvs.Clear();
+        _vert = 0;
+        _tris = 0;
+
+        //Set new values
+        _quadSize = (int)Mathf.Pow(2, _subdevisionIteration);
+        _triangles = new int[(_quadSize + 1) * (_quadSize + 1) * 6];
+    }
+
+
+    /// <summary>
+    /// Generates the polygon collider for the mesh
+    /// </summary>
     private void updateCollider()
     {
-        _collider.pathCount = 0;
         Vector2[] path = { topLeft, topRight, bottomRight, bottomLeft };
         _collider.SetPath(0, path);
+    }
+
+
+    private void NullChecks()
+    {
+        if (_mesh == null)
+        {
+            _mesh = new Mesh();
+            GetComponent<MeshFilter>().mesh = _mesh;
+        }
+
+        MeshRenderer meshRend = GetComponent<MeshRenderer>();
+        if (GetComponent<MeshRenderer>().sharedMaterial == null)
+        {
+            meshRend.material = new Material(Shader.Find("Standard"));
+        }
     }
 }
 

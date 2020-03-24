@@ -848,13 +848,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09187b0b1172dc44d9206f2ec970d851, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scrollSpeed: 5
-  _currentState: 0
+  currentState: 0
   _maskImage: {fileID: 1948259094}
-  _cursorImage: {fileID: 1080996364}
+  _drawCursorImage: {fileID: 1080996364}
   _selectedManager: {fileID: 1308517357}
   _selectedColor: {r: 0, g: 0, b: 0, a: 0}
   _radius: 28
+  _scrollSpeed: 1
 --- !u!222 &569121603
 CanvasRenderer:
   m_ObjectHideFlags: 0

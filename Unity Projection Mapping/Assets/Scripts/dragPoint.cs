@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
+/// <summary>
+/// Draggable point for the ImageProjector
+/// </summary>
 public class dragPoint : MonoBehaviour, IDragHandler
 {
     public void OnDrag(PointerEventData eventData)
@@ -11,6 +11,6 @@ public class dragPoint : MonoBehaviour, IDragHandler
         Vector3 screenPoint = Input.mousePosition;
         Vector3 newPos = Camera.main.ScreenToWorldPoint(screenPoint);
         transform.position = newPos;
-        GetComponentInParent<ImageProjector>().UpdatePosition();
+        GetComponentInParent<ImageProjector>().UpdateDragPositions();
     }
 }

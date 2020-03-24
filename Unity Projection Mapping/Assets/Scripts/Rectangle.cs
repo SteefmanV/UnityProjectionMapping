@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 
 struct Rectangle
 {
-    // A ---- B
-    // |      |
-    // |      |
-    // D ---- C
+    //     horizontalVanishpoint = Where line A-D and B-C intersect
+    // A ------- B                                                                                                                
+    // | \     / |
+    // |    O    |  verticalVanishPoint = Where line A-B and C-D intersect
+    // | /     \ |
+    // D ------- C
 
     public Vector2 pointA { get; set; }
     public Vector2 pointB { get; set; }
@@ -28,7 +25,9 @@ struct Rectangle
     }
         
 
-
+    /// <summary>
+    /// Draws the rectangle with Gizmos
+    /// </summary>
     public void DrawGizmoOutline()
     {
         Gizmos.color = Color.green;

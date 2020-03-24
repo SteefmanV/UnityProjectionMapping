@@ -1,35 +1,28 @@
-﻿
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class MaskDrawer : MonoBehaviour
 {
-    public float scrollSpeed = 1;
 
     public enum DrawState { off, draw, erase };
-    public DrawState _currentState = DrawState.off;
+    public DrawState currentState = DrawState.off;
 
     [SerializeField] private RawImage _maskImage;
-    [SerializeField] private Image _cursorImage = null;
+    [SerializeField] private Image _drawCursorImage = null;
     [SerializeField] private SelectedManager _selectedManager = null;
+    private Texture2D _maskTexture;
 
     [Header("Draw Settings")]
     [SerializeField] private Color _selectedColor;
     [SerializeField] private float _radius;
-    private Texture2D _maskTexture;
-
+    [SerializeField] private float _scrollSpeed = 1;
 
     private Color _black = Color.black;
     private Color _transparant = new Color(1, 1, 1, 0);
-    private Vector2 _lastPos;
-
     private Color[] _imageColors;
-    private int _screenWidth;
 
-    private bool _drawing = false;
+    private Vector2 _lastPos;
+    private int _screenWidth;
 
 
     private void Awake()
@@ -43,52 +36,13 @@ public class MaskDrawer : MonoBehaviour
         resetBuffer();
         _lastPos = Input.mousePosition;
 
-        _cursorImage.rectTransform.localScale = new Vector2(_radius * 0.001f, _radius * 0.001f);
+        updateCursorSize();
     }
 
 
     void Update()
     {
-        updateCursorSize();
-        _cursorImage.rectTransform.localPosition = (Vector2)Input.mousePosition - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
-
-        float mouseScroll = Input.GetAxis("Mouse ScrollWheel");
-        if (mouseScroll != 0)
-        {
-            _radius += mouseScroll * scrollSpeed;  // Change radius size 
-            updateCursorSize();
-        }
-
-        if (_currentState != DrawState.off)
-        {
-            if (Input.GetMouseButtonDown(1)) // Eraser
-            {
-               // _selectedColor = _transparant;
-                drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
-            }
-            else if (Input.GetMouseButtonDown(0)) // Pencil
-            {
-                //_selectedColor = _black;
-                drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
-            }
-
-            if (Input.GetMouseButton(0) || Input.GetMouseButton(1))
-            {
-                drawThickLine(_lastPos, Input.mousePosition);
-                drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
-                applyChanges();
-            }
-
-            _cursorImage.gameObject.SetActive(true);
-        }
-        else
-        {
-            _cursorImage.gameObject.SetActive(false);
-        }
-
-        if (Input.GetKeyDown(KeyCode.R)) ResetTexture(); // Reset
-
-        _lastPos = Input.mousePosition;
+        handleMouseInput();
     }
 
 
@@ -119,13 +73,13 @@ public class MaskDrawer : MonoBehaviour
     /// </summary>
     public void ToggleDraw()
     {
-        if (_currentState != DrawState.draw)
+        if (currentState != DrawState.draw)
         {
-            _currentState = DrawState.draw;
+            currentState = DrawState.draw;
             _selectedColor = _black;
-            _selectedManager.DeselectAll();
+            _selectedManager.DeselectCurrentProjector();
         }
-        else _currentState = DrawState.off;
+        else currentState = DrawState.off;
     }
 
 
@@ -134,13 +88,45 @@ public class MaskDrawer : MonoBehaviour
     /// </summary>
     public void ToggleErase()
     {
-        if (_currentState != DrawState.erase)
+        if (currentState != DrawState.erase)
         {
-            _currentState = DrawState.erase;
+            currentState = DrawState.erase;
             _selectedColor = _transparant;
-            _selectedManager.DeselectAll();
+            _selectedManager.DeselectCurrentProjector();
         }
-        else _currentState = DrawState.off;
+        else currentState = DrawState.off;
+    }
+
+
+    /// <summary>
+    /// Handle mouse put
+    /// </summary>
+    private void handleMouseInput()
+    {
+        updateMouseCursor();
+
+        if (currentState != DrawState.off)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
+            }
+
+            if (Input.GetMouseButton(0))
+            {
+                drawThickLine(_lastPos, Input.mousePosition);
+                drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
+                applyChanges();
+            }
+
+            _drawCursorImage.gameObject.SetActive(true);
+        }
+        else
+        {
+            _drawCursorImage.gameObject.SetActive(false);
+        }
+
+        _lastPos = Input.mousePosition;
     }
 
 
@@ -212,7 +198,6 @@ public class MaskDrawer : MonoBehaviour
     }
 
 
-
     /// <summary>
     /// Empty the imageColors array
     /// </summary>
@@ -242,10 +227,27 @@ public class MaskDrawer : MonoBehaviour
 
 
     /// <summary>
+    /// Update mousecursor position and size
+    /// </summary>
+    private void updateMouseCursor()
+    {
+        _drawCursorImage.rectTransform.localPosition = (Vector2)Input.mousePosition - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+
+        float mouseScroll = Input.GetAxis("Mouse ScrollWheel");
+        if (mouseScroll != 0)
+        {
+            _radius += mouseScroll * _scrollSpeed; // Change radius size 
+            updateCursorSize();
+        }
+    }
+
+
+    /// <summary>
     /// Sets the cursor size equal to the draw radius
     /// </summary>
     private void updateCursorSize()
     {
-        _cursorImage.rectTransform.localScale = new Vector2(_radius * 2 * 0.001f, _radius * 2 * 0.001f); // Cursor image is 1000x1000 so *0.001f makes it 1 pixel
+        // Cursor image is 1000x1000 so *0.001f makes it 1 pixel
+        _drawCursorImage.rectTransform.localScale = new Vector2(_radius * 2 * 0.001f, _radius * 2 * 0.001f);
     }
 }
