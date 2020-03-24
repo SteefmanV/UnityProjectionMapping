@@ -8,8 +8,13 @@ using UnityEngine.UI;
 public class MaskDrawer : MonoBehaviour
 {
     public float scrollSpeed = 1;
+
+    public enum DrawState { off, draw, erase };
+    public DrawState _currentState = DrawState.off;
+
     [SerializeField] private RawImage _maskImage;
     [SerializeField] private Image _cursorImage = null;
+    [SerializeField] private SelectedManager _selectedManager = null;
 
     [Header("Draw Settings")]
     [SerializeField] private Color _selectedColor;
@@ -24,6 +29,8 @@ public class MaskDrawer : MonoBehaviour
     private Color[] _imageColors;
     private int _screenWidth;
 
+    private bool _drawing = false;
+
 
     private void Awake()
     {
@@ -32,7 +39,7 @@ public class MaskDrawer : MonoBehaviour
         _screenWidth = Screen.width;
         _selectedColor = _black;
 
-        resetTexture();
+        ResetTexture();
         resetBuffer();
         _lastPos = Input.mousePosition;
 
@@ -52,28 +59,88 @@ public class MaskDrawer : MonoBehaviour
             updateCursorSize();
         }
 
-
-        if (Input.GetMouseButtonDown(1)) // Eraser
+        if (_currentState != DrawState.off)
         {
-            _selectedColor = _transparant;
-            drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
+            if (Input.GetMouseButtonDown(1)) // Eraser
+            {
+               // _selectedColor = _transparant;
+                drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
+            }
+            else if (Input.GetMouseButtonDown(0)) // Pencil
+            {
+                //_selectedColor = _black;
+                drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
+            }
+
+            if (Input.GetMouseButton(0) || Input.GetMouseButton(1))
+            {
+                drawThickLine(_lastPos, Input.mousePosition);
+                drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
+                applyChanges();
+            }
+
+            _cursorImage.gameObject.SetActive(true);
         }
-        else if (Input.GetMouseButtonDown(0)) // Pencil
+        else
         {
-            _selectedColor = _black;
-            drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
+            _cursorImage.gameObject.SetActive(false);
         }
 
-        if (Input.GetMouseButton(0) || Input.GetMouseButton(1))
-        {
-            drawThickLine(_lastPos, Input.mousePosition);
-            drawCircle((int)Input.mousePosition.x, (int)Input.mousePosition.y, (int)_radius);
-            applyChanges();
-        }
-
-        if (Input.GetKeyDown(KeyCode.R)) resetTexture(); // Reset
+        if (Input.GetKeyDown(KeyCode.R)) ResetTexture(); // Reset
 
         _lastPos = Input.mousePosition;
+    }
+
+
+    /// <summary>
+    /// Clears the texture
+    /// </summary>
+    public void ResetTexture()
+    {
+        Color[] _maskPixels = new Color[Screen.width * Screen.height];
+
+        for (int x = 0; x < Screen.width; ++x)
+        {
+            for (int y = 0; y < Screen.height; ++y)
+            {
+                _maskPixels[y * Screen.width + x] = _transparant;
+            }
+        }
+
+        _maskTexture.SetPixels(_maskPixels);
+        _maskTexture.Apply();
+
+        resetBuffer();
+    }
+
+
+    /// <summary>
+    /// Toggles draw mode
+    /// </summary>
+    public void ToggleDraw()
+    {
+        if (_currentState != DrawState.draw)
+        {
+            _currentState = DrawState.draw;
+            _selectedColor = _black;
+            _selectedManager.DeselectAll();
+        }
+        else _currentState = DrawState.off;
+    }
+
+
+    /// <summary>
+    /// Toggles erase mode
+    /// </summary>
+    public void ToggleErase()
+    {
+        if (_currentState != DrawState.erase)
+        {
+            _currentState = DrawState.erase;
+            _selectedColor = _transparant;
+            _selectedManager.DeselectAll();
+        }
+        else _currentState = DrawState.off;
     }
 
 
@@ -99,7 +166,7 @@ public class MaskDrawer : MonoBehaviour
     /// <summary>
     /// Draws a line from p1 to p2
     /// </summary>
-    public void DrawLine(Vector2 p1, Vector2 p2)
+    private void DrawLine(Vector2 p1, Vector2 p2)
     {
         Vector2 t = p1;
         float frac = 1 / Mathf.Sqrt(Mathf.Pow(p2.x - p1.x, 2) + Mathf.Pow(p2.y - p1.y, 2));
@@ -144,27 +211,6 @@ public class MaskDrawer : MonoBehaviour
         return Mathf.Sqrt(deltaX * deltaX + deltaY * deltaY);
     }
 
-
-    /// <summary>
-    /// Clears the texture
-    /// </summary>
-    private void resetTexture()
-    {
-        Color[] _maskPixels = new Color[Screen.width * Screen.height];
-
-        for (int x = 0; x < Screen.width; ++x)
-        {
-            for (int y = 0; y < Screen.height; ++y)
-            {
-                _maskPixels[y * Screen.width + x] = _transparant;
-            }
-        }
-
-        _maskTexture.SetPixels(_maskPixels);
-        _maskTexture.Apply();
-
-        resetBuffer();
-    }
 
 
     /// <summary>

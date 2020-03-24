@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
+[RequireComponent(typeof(PolygonCollider2D))]
 [ExecuteInEditMode]
 public class ImageProjector : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class ImageProjector : MonoBehaviour
     public Transform[] dragPoints = new Transform[4];
 
     private Mesh _mesh;
+    private PolygonCollider2D _collider = null;
     private List<Vector3> _vertices = new List<Vector3>();
     private List<Vector2> _uvs = new List<Vector2>();
     private int[] _triangles;
@@ -27,10 +29,37 @@ public class ImageProjector : MonoBehaviour
     private int vert = 0;
     private int tris = 0;
 
+    private void Awake()
+    {
+        _collider = GetComponent<PolygonCollider2D>();
+        UpdatePosition();
+    }
+
+    public void UpdatePosition()
+    {
+        topLeft = dragPoints[2].position;
+        topRight = dragPoints[0].position;
+        bottomLeft = dragPoints[3].position;
+        bottomRight = dragPoints[1].position;
+
+        updateCollider();
+    }
+
+
+    public void SetSelected(bool pActive)
+    {
+        foreach (Transform dragPoint in dragPoints)
+        {
+            dragPoint.gameObject.SetActive(pActive);
+        }
+    }
+
+
     void OnDrawGizmos()
     {
         DrawPerspectiveQuad();
     }
+
 
     private void DrawPerspectiveQuad()
     {
@@ -152,21 +181,12 @@ public class ImageProjector : MonoBehaviour
         tris += 6;
     }
 
-    public void updatePosition()
-    {
-        topLeft = dragPoints[2].position;
-        topRight = dragPoints[0].position;
-        bottomLeft = dragPoints[3].position;
-        bottomRight = dragPoints[1].position;
-    }
 
-
-    public void SetSelected(bool pActive)
+    private void updateCollider()
     {
-        foreach(Transform dragPoint in dragPoints)
-        {
-            dragPoint.gameObject.SetActive(pActive);
-        }  
+        _collider.pathCount = 0;
+        Vector2[] path = { topLeft, topRight, bottomRight, bottomLeft };
+        _collider.SetPath(0, path);
     }
 }
 
