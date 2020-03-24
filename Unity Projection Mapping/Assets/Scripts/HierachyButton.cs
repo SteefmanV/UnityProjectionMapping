@@ -6,13 +6,15 @@ using TMPro;
 /// </summary>
 public class HierachyButton : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _nameText;
+    public bool selected = false;
 
-    private SelectedManager _selectedManager = null;
+    [SerializeField] private TextMeshProUGUI _nameText = null;
+
+    private HierachyManager _selectedManager = null;
 
     private void Awake()
     {
-        _selectedManager = FindObjectOfType<SelectedManager>();
+        _selectedManager = FindObjectOfType<HierachyManager>();
     }
 
     /// <summary>
@@ -20,7 +22,17 @@ public class HierachyButton : MonoBehaviour
     /// </summary>
     public void SelectImage()
     {
-        _selectedManager.SelectObject(gameObject);
+        if (selected)
+        {
+            _selectedManager.DeselectCurrentProjector();
+            FindObjectOfType<UnityEngine.EventSystems.EventSystem>().SetSelectedGameObject(null);
+        }
+        else
+        {
+            _selectedManager.SelectObject(gameObject);
+        }
+
+        selected = !selected;
     }
 
     /// <summary>

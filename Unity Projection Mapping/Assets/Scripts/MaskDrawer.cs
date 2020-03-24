@@ -7,15 +7,19 @@ public class MaskDrawer : MonoBehaviour
     public enum DrawState { off, draw, erase };
     public DrawState currentState = DrawState.off;
 
-    [SerializeField] private RawImage _maskImage;
+    [SerializeField] private RawImage _maskImage = null;
     [SerializeField] private Image _drawCursorImage = null;
-    [SerializeField] private SelectedManager _selectedManager = null;
-    private Texture2D _maskTexture;
+    [SerializeField] private HierachyManager _selectedManager = null;
+    private Texture2D _maskTexture = null;
 
     [Header("Draw Settings")]
     [SerializeField] private Color _selectedColor;
     [SerializeField] private float _radius;
     [SerializeField] private float _scrollSpeed = 1;
+
+    [Header("Toolbar button")]
+    [SerializeField] private Button _pencilButton = null;
+    [SerializeField] private Button _eraserButton = null;
 
     private Color _black = Color.black;
     private Color _transparant = new Color(1, 1, 1, 0);
@@ -43,6 +47,7 @@ public class MaskDrawer : MonoBehaviour
     void Update()
     {
         handleMouseInput();
+        updateToolBarButtons();
     }
 
 
@@ -78,8 +83,13 @@ public class MaskDrawer : MonoBehaviour
             currentState = DrawState.draw;
             _selectedColor = _black;
             _selectedManager.DeselectCurrentProjector();
+            _pencilButton.Select();
         }
-        else currentState = DrawState.off;
+        else
+        {
+            currentState = DrawState.off;
+            FindObjectOfType<UnityEngine.EventSystems.EventSystem>().SetSelectedGameObject(null);
+        }
     }
 
 
@@ -93,8 +103,13 @@ public class MaskDrawer : MonoBehaviour
             currentState = DrawState.erase;
             _selectedColor = _transparant;
             _selectedManager.DeselectCurrentProjector();
+            _eraserButton.Select();
         }
-        else currentState = DrawState.off;
+        else
+        {
+            currentState = DrawState.off;
+            FindObjectOfType<UnityEngine.EventSystems.EventSystem>().SetSelectedGameObject(null);
+        }
     }
 
 
@@ -233,11 +248,15 @@ public class MaskDrawer : MonoBehaviour
     {
         _drawCursorImage.rectTransform.localPosition = (Vector2)Input.mousePosition - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
 
-        float mouseScroll = Input.GetAxis("Mouse ScrollWheel");
-        if (mouseScroll != 0)
+        if (currentState != DrawState.off)
         {
-            _radius += mouseScroll * _scrollSpeed; // Change radius size 
-            updateCursorSize();
+            float mouseScroll = Input.GetAxis("Mouse ScrollWheel");
+            if (mouseScroll != 0)
+            {
+                _radius += mouseScroll * _scrollSpeed; // Change radius size 
+                if (_radius < 1) _radius = 1;
+                updateCursorSize();
+            }
         }
     }
 
@@ -249,5 +268,18 @@ public class MaskDrawer : MonoBehaviour
     {
         // Cursor image is 1000x1000 so *0.001f makes it 1 pixel
         _drawCursorImage.rectTransform.localScale = new Vector2(_radius * 2 * 0.001f, _radius * 2 * 0.001f);
+    }
+
+    private void updateToolBarButtons()
+    {
+        switch (currentState)
+        {
+            case DrawState.draw:
+                _pencilButton.Select();
+                break;
+            case DrawState.erase:
+                _eraserButton.Select();
+                break;
+        }
     }
 }

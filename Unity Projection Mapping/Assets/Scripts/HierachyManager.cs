@@ -4,11 +4,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class SelectedManager : MonoBehaviour
+public class HierachyManager : MonoBehaviour
 {
     [SerializeField] private GameObject _imageProjectorPrefab = null;
     [SerializeField] private GameObject _imageButtonPrefab = null;
-    [SerializeField] private MaskDrawer _maskDrawer;
+    [SerializeField] private MaskDrawer _maskDrawer = null;
+
+    [Header("Hierachy UI")]
+    [SerializeField] private GameObject _hierachy = null;
+    [SerializeField] private GameObject _hierachyGroup = null;
+
+    [Header("Toolbar UI")]
+    [SerializeField] private GameObject _toolBar = null;
 
     [Header("Selected UI")]
     [SerializeField] private GameObject _selectedPanel = null;
@@ -22,6 +29,8 @@ public class SelectedManager : MonoBehaviour
     private Button _selectedButton = null;
     private int imageID = 0; // todo: replace this with ectual image names (in the Image projector)
 
+    private bool _fullScreen = false;
+
 
     private void Update()
     {
@@ -30,7 +39,21 @@ public class SelectedManager : MonoBehaviour
             updateSelectionUI();
             _selectedButton.Select();
         }
+
         handleMouseSelection();
+    }
+
+
+    public void ToggleFullScreen()
+    {
+        _fullScreen = !_fullScreen;
+        if(_selectedPanel.activeSelf) _selectedPanel.SetActive(false);
+        _hierachy.SetActive(!_fullScreen);
+        _toolBar.SetActive(!_fullScreen);
+
+        DeselectCurrentProjector();
+        FindObjectOfType<UnityEngine.EventSystems.EventSystem>().SetSelectedGameObject(null);
+
     }
 
 
@@ -41,9 +64,11 @@ public class SelectedManager : MonoBehaviour
     {
         imageID += 1;
         GameObject newImage = Instantiate(_imageProjectorPrefab);
-        GameObject newButton = Instantiate(_imageButtonPrefab, transform);
+        GameObject newButton = Instantiate(_imageButtonPrefab, _hierachyGroup.transform);
         _imageObjects.Add(newButton, newImage.GetComponent<ImageProjector>());
         newButton.GetComponent<HierachyButton>().SetName(imageID + ".");
+        _maskDrawer.currentState = MaskDrawer.DrawState.off;
+        SelectObject(newButton);
     }
 
 
@@ -88,7 +113,8 @@ public class SelectedManager : MonoBehaviour
     /// </summary>
     public void DeselectCurrentProjector()
     {
-        if(_selectedImage != null) _selectedImage.ToggleSelected(false);
+        if (_selectedImage != null) _selectedImage.ToggleSelected(false);
+        if (_selectedButton != null) _selectedButton.GetComponent<HierachyButton>().selected = false;
 
         _selectedButton = null;
         _selectedImage = null;
