@@ -17,6 +17,8 @@ public class ImageProjector : MonoBehaviour
     public Vector3 bottomLeft = new Vector3(0, 0, 0);
     public Vector3 bottomRight = new Vector3(100, 0, 0);
 
+    public Transform[] dragPoints = new Transform[4];
+
     private Mesh _mesh;
     private List<Vector3> _vertices = new List<Vector3>();
     private List<Vector2> _uvs = new List<Vector2>();
@@ -149,4 +151,29 @@ public class ImageProjector : MonoBehaviour
         vert += 4;
         tris += 6;
     }
+
+    public void updatePosition()
+    {
+        topLeft = dragPoints[2].position;
+        topRight = dragPoints[0].position;
+        bottomLeft = dragPoints[3].position;
+        bottomRight = dragPoints[1].position;
+    }
+
+
+    public void SetSelected(bool pActive)
+    {
+        foreach(Transform dragPoint in dragPoints)
+        {
+            dragPoint.gameObject.SetActive(pActive);
+        }  
+    }
 }
+
+
+
+
+
+
+
+

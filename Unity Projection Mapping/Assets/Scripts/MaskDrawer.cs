@@ -9,6 +9,7 @@ public class MaskDrawer : MonoBehaviour
 {
     public float scrollSpeed = 1;
     [SerializeField] private RawImage _maskImage;
+    [SerializeField] private Image _cursorImage = null;
 
     [Header("Draw Settings")]
     [SerializeField] private Color _selectedColor;
@@ -16,7 +17,7 @@ public class MaskDrawer : MonoBehaviour
     private Texture2D _maskTexture;
 
 
-    private Color _black = Color.black;   
+    private Color _black = Color.black;
     private Color _transparant = new Color(1, 1, 1, 0);
     private Vector2 _lastPos;
 
@@ -34,13 +35,23 @@ public class MaskDrawer : MonoBehaviour
         resetTexture();
         resetBuffer();
         _lastPos = Input.mousePosition;
+
+        _cursorImage.rectTransform.localScale = new Vector2(_radius * 0.001f, _radius * 0.001f);
     }
 
 
     void Update()
     {
+        updateCursorSize();
+        _cursorImage.rectTransform.localPosition = (Vector2)Input.mousePosition - new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+
         float mouseScroll = Input.GetAxis("Mouse ScrollWheel");
-        if(mouseScroll != 0) _radius += mouseScroll * scrollSpeed;  // Change radius size
+        if (mouseScroll != 0)
+        {
+            _radius += mouseScroll * scrollSpeed;  // Change radius size 
+            updateCursorSize();
+        }
+
 
         if (Input.GetMouseButtonDown(1)) // Eraser
         {
@@ -181,5 +192,14 @@ public class MaskDrawer : MonoBehaviour
     private void SetPixel(int pX, int pY, Color pColor)
     {
         _imageColors[pY * _screenWidth + pX] = pColor;
+    }
+
+
+    /// <summary>
+    /// Sets the cursor size equal to the draw radius
+    /// </summary>
+    private void updateCursorSize()
+    {
+        _cursorImage.rectTransform.localScale = new Vector2(_radius * 2 * 0.001f, _radius * 2 * 0.001f); // Cursor image is 1000x1000 so *0.001f makes it 1 pixel
     }
 }

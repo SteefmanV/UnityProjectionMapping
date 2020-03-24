@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 
 [CustomEditor(typeof(ImageProjector))]
-public class FreeMoveHandleExampleEditor : Editor
+public class MoveHandlesEditor : Editor
 {
     protected virtual void OnSceneGUI()
     {
@@ -21,5 +21,11 @@ public class FreeMoveHandleExampleEditor : Editor
         example.topRight = topRight;
         example.bottomRight = bottomRight;
         example.bottomLeft = bottomLeft;
+
+        example.dragPoints[0].transform.position = topLeft;
+        example.dragPoints[1].transform.position = topRight;
+        example.dragPoints[2].transform.position = bottomLeft;
+        example.dragPoints[3].transform.position = bottomRight;
+
     }
 }
