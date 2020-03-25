@@ -245,7 +245,9 @@ public class MaskDrawer : MonoBehaviour
     /// </summary>
     private void SetPixel(int pX, int pY, Color pColor)
     {
-        _imageColors[pY * _screenWidth + pX] = pColor;
+        int index = pY * +_screenWidth + pX;
+        if (index > 0 && index < _imageColors.Length)
+            _imageColors[index] = pColor;
     }
 
 

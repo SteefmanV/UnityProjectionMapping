@@ -48,10 +48,10 @@ public class ImageProjector : MonoBehaviour
     /// </summary>
     public void UpdateDragPositions()
     {
-        topLeft = dragPoints[2].position;
-        topRight = dragPoints[0].position;
-        bottomLeft = dragPoints[3].position;
-        bottomRight = dragPoints[1].position;
+        topLeft = dragPoints[0].position;
+        topRight = dragPoints[1].position;
+        bottomLeft = dragPoints[2].position;
+        bottomRight = dragPoints[3].position;
 
         updateCollider();
     }
