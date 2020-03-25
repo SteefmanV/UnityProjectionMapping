@@ -25,6 +25,15 @@ public class SelectedUI : MonoBehaviour
     }
 
 
+    private void Update()
+    {
+        if (_selectedImage != null) updateSelectionUI();
+    }
+
+
+    /// <summary>
+    /// Changes the name of the Image Projector
+    /// </summary>
     public void NameChanged(string pNewName)
     {
         _selectedImage.projectorName = pNewName;
@@ -32,6 +41,9 @@ public class SelectedUI : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Changes the material of the Image Projector
+    /// </summary>
     public void selectNewMatrial(Material pMat, Sprite pMaterialThumbnail)
     {
         _selectedImage.ChangeMaterial(pMat);
@@ -40,21 +52,21 @@ public class SelectedUI : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Updates the selected object
+    /// </summary>
     private void OnSelectedObjectChanged(object sender, SelectedImageEventArgs e)
     {
         _selectedImage = e.imageProjector;
     }
 
 
+    /// <summary>
+    /// Toggles the material selection pandel
+    /// </summary>
     public void ToggleMaterialSelection()
     {
         _materialSelector.SetActive(!_materialSelector.activeSelf);
-    }
-
-
-    private void Update()
-    {
-        if(_selectedImage != null) updateSelectionUI();
     }
 
 

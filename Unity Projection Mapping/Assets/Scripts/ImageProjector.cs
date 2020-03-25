@@ -9,6 +9,8 @@ public class ImageProjector : MonoBehaviour
 {
     public string projectorName { get; set; } = "Image Projector";
 
+    [SerializeField] private TransformHandle _transformHandle = null;
+
     [Header("Corner positions")]
     public Vector3 topLeft = new Vector3(0, 100, 0);
     public Vector3 topRight = new Vector3(100, 100, 0);
@@ -17,7 +19,6 @@ public class ImageProjector : MonoBehaviour
     public Transform[] dragPoints = new Transform[4];
 
     public Sprite materialThumbnail = null;
-
 
     [Header("Settings")]
     [SerializeField] private bool _drawGizmos = false;
@@ -40,6 +41,7 @@ public class ImageProjector : MonoBehaviour
     {
         _collider = GetComponent<PolygonCollider2D>();
         UpdateDragPositions();
+        _transformHandle.TransformChanged += OnTransformChanged;
     }
 
 
@@ -53,6 +55,8 @@ public class ImageProjector : MonoBehaviour
         bottomLeft = dragPoints[2].position;
         bottomRight = dragPoints[3].position;
 
+        DrawPerspectiveQuad();
+
         updateCollider();
     }
 
@@ -62,6 +66,8 @@ public class ImageProjector : MonoBehaviour
     /// </summary>
     public void ToggleSelected(bool pActive)
     {
+        _transformHandle.gameObject.SetActive(pActive);
+
         foreach (Transform dragPoint in dragPoints)
         {
             dragPoint.gameObject.SetActive(pActive);
@@ -79,9 +85,17 @@ public class ImageProjector : MonoBehaviour
     }
 
 
-    void OnDrawGizmos()
+    /// <summary>
+    /// Updates the drag point position based on the transform translation
+    /// </summary>
+    private void OnTransformChanged(object sender, TransformChangedEventArgs e)
     {
-        DrawPerspectiveQuad();
+        foreach (Transform dragPoint in dragPoints)
+        {
+            dragPoint.transform.position += e.translation;
+        }
+
+        UpdateDragPositions();
     }
 
 
@@ -95,6 +109,8 @@ public class ImageProjector : MonoBehaviour
 
         Rectangle rect = new Rectangle(topLeft, topRight, bottomRight, bottomLeft); //Create new Rectangle
         SubdivideRectangle(rect, new Vector2(0, 0), new Vector2(1, 1), 0); //Start recursive algorithm
+
+        _transformHandle.SetPosition(rect.GetOrthographicCenter());
 
         GenerateMesh();
     }
@@ -114,20 +130,20 @@ public class ImageProjector : MonoBehaviour
 
         Vector3 vanishPoint1 = pRec.getHorizontalVanishPoint();
         Vector3 vanishPoint2 = pRec.getVerticalVanishPoint();
-        Vector3 quadCenter = pRec.GetCenter();
+        Vector3 quadCenter = pRec.GetPerspectiveCenter();
         //     V1 = Where line A-D and B-C intersect
         Vector3 intersection1 = Rectangle.LineIntersection(quadCenter, vanishPoint1, pRec.pointA, pRec.pointB);     // A ------- B                                                                                                                
         Vector3 intersection2 = Rectangle.LineIntersection(quadCenter, vanishPoint1, pRec.pointC, pRec.pointD);     // | \     / |
         Vector3 intersection3 = Rectangle.LineIntersection(quadCenter, vanishPoint2, pRec.pointB, pRec.pointC);     // |    O    |  V2 = Where line A-B and C-D intersect
         Vector3 intersection4 = Rectangle.LineIntersection(quadCenter, vanishPoint2, pRec.pointA, pRec.pointD);     // | /     \ |
                                                                                                                     // D ------- C
-        if (_drawGizmos)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(intersection1, intersection2);
-            Gizmos.DrawLine(intersection3, intersection4);
-            pRec.DrawGizmoOutline();
-        }
+        //if (_drawGizmos)
+        //{
+        //    Gizmos.color = Color.green;
+        //    Gizmos.DrawLine(intersection1, intersection2);
+        //    Gizmos.DrawLine(intersection3, intersection4);
+        //    pRec.DrawGizmoOutline();
+        //}
 
         // Subdivide rectangle in 4 more rectangles
         Vector2 newUVRange = pUVRange / 2;

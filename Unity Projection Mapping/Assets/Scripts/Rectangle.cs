@@ -46,9 +46,18 @@ struct Rectangle
     /// <summary>
     /// Return the perspective center of the Rectangle
     /// </summary>
-    public Vector2 GetCenter()
+    public Vector2 GetPerspectiveCenter()
     {
         return LineIntersection(pointA, pointC, pointB, pointD);
+    }
+
+
+    /// <summary>
+    /// Return the perspective center of the Rectangle
+    /// </summary>
+    public Vector2 GetOrthographicCenter()
+    {
+        return (pointA + pointB + pointC + pointD) * 0.25f;
     }
 
 
