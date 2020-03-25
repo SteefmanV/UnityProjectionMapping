@@ -10,6 +10,7 @@ public class dragPoint : MonoBehaviour, IDragHandler
     {
         Vector3 screenPoint = Input.mousePosition;
         Vector3 newPos = Camera.main.ScreenToWorldPoint(screenPoint);
+        newPos.z = -80;
         transform.position = newPos;
         GetComponentInParent<ImageProjector>().UpdateDragPositions();
     }

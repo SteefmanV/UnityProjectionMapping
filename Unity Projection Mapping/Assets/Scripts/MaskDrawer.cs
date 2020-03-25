@@ -36,6 +36,8 @@ public class MaskDrawer : MonoBehaviour
         _screenWidth = Screen.width;
         _selectedColor = _black;
 
+        _selectedManager.SelectedImageChanged += disableDrawMode;
+
         ResetTexture();
         resetBuffer();
         _lastPos = Input.mousePosition;
@@ -110,6 +112,12 @@ public class MaskDrawer : MonoBehaviour
             currentState = DrawState.off;
             FindObjectOfType<UnityEngine.EventSystems.EventSystem>().SetSelectedGameObject(null);
         }
+    }
+
+
+    private void disableDrawMode(object sender, SelectedImageEventArgs e)
+    {
+        currentState = DrawState.off;
     }
 
 

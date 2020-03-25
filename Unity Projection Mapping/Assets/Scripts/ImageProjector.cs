@@ -7,6 +7,7 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class ImageProjector : MonoBehaviour
 {
+    public string projectorName { get; set; } = "Image Projector";
 
     [Header("Corner positions")]
     public Vector3 topLeft = new Vector3(0, 100, 0);
@@ -14,6 +15,9 @@ public class ImageProjector : MonoBehaviour
     public Vector3 bottomLeft = new Vector3(0, 0, 0);
     public Vector3 bottomRight = new Vector3(100, 0, 0);
     public Transform[] dragPoints = new Transform[4];
+
+    public Sprite materialThumbnail = null;
+
 
     [Header("Settings")]
     [SerializeField] private bool _drawGizmos = false;
@@ -65,6 +69,16 @@ public class ImageProjector : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Change the quad material
+    /// </summary>
+    public void ChangeMaterial(Material pMat)
+    {
+        MeshRenderer meshRend = GetComponent<MeshRenderer>();
+        meshRend.material = pMat;
+    }
+
+
     void OnDrawGizmos()
     {
         DrawPerspectiveQuad();
@@ -101,13 +115,13 @@ public class ImageProjector : MonoBehaviour
         Vector3 vanishPoint1 = pRec.getHorizontalVanishPoint();
         Vector3 vanishPoint2 = pRec.getVerticalVanishPoint();
         Vector3 quadCenter = pRec.GetCenter();
-                                                                                                                    //     V1 = Where line A-D and B-C intersect
+        //     V1 = Where line A-D and B-C intersect
         Vector3 intersection1 = Rectangle.LineIntersection(quadCenter, vanishPoint1, pRec.pointA, pRec.pointB);     // A ------- B                                                                                                                
         Vector3 intersection2 = Rectangle.LineIntersection(quadCenter, vanishPoint1, pRec.pointC, pRec.pointD);     // | \     / |
         Vector3 intersection3 = Rectangle.LineIntersection(quadCenter, vanishPoint2, pRec.pointB, pRec.pointC);     // |    O    |  V2 = Where line A-B and C-D intersect
         Vector3 intersection4 = Rectangle.LineIntersection(quadCenter, vanishPoint2, pRec.pointA, pRec.pointD);     // | /     \ |
                                                                                                                     // D ------- C
-        if (_drawGizmos)                                                                                               
+        if (_drawGizmos)
         {
             Gizmos.color = Color.green;
             Gizmos.DrawLine(intersection1, intersection2);

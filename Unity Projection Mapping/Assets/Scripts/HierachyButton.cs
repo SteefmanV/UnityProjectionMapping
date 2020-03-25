@@ -17,6 +17,7 @@ public class HierachyButton : MonoBehaviour
         _selectedManager = FindObjectOfType<HierachyManager>();
     }
 
+
     /// <summary>
     /// Select the Image Projector
     /// </summary>
@@ -35,6 +36,7 @@ public class HierachyButton : MonoBehaviour
         selected = !selected;
     }
 
+
     /// <summary>
     /// Delete Image projector from the view
     /// </summary>
@@ -42,6 +44,7 @@ public class HierachyButton : MonoBehaviour
     {
         _selectedManager.DeleteObject(gameObject);
     }
+
 
     /// <summary>
     /// Change Image Projector name
