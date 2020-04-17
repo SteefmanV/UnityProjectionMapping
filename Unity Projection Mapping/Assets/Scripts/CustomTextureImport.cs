@@ -10,6 +10,13 @@ public class CustomTextureImport : MonoBehaviour
 {
     private Material _imageMaterial = null;
 
+
+    private void Start()
+    {
+        _imageMaterial = new Material(Shader.Find("HDRP/Lit"));
+    }
+
+
     public void ImportCustomFile()
     {
         string filePath = searchFileInExplorer();
@@ -48,13 +55,17 @@ public class CustomTextureImport : MonoBehaviour
     /// </summary>
     private Texture2D loadFileIntoTexture(string pFilePath)
     {
-        Texture2D texture = null; // Create default texture, size doesn't matter
+        Texture2D texture = new Texture2D(1,1); // Create default texture, size doesn't matter
+        Debug.Log("file path: " + pFilePath);
 
         if (File.Exists(pFilePath))
         {
             byte[] fileData = File.ReadAllBytes(pFilePath);
+            Debug.Log("File Data: " + pFilePath);
             texture.LoadImage(fileData); // Loads image data and resets the texture size
         }
+
+        Debug.Log("Texture: " + texture);
 
         return texture;
     }
