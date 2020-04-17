@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Video;
 using UnityEngine.UI;
 using TMPro;
 
@@ -21,7 +22,7 @@ public class SelectedUI : MonoBehaviour
 
     private void Awake()
     {
-        _hierachyManager.SelectedImageChanged += OnSelectedObjectChanged;
+        _hierachyManager.SelectedImageChanged += onSelectedObjectChanged;
     }
 
 
@@ -44,7 +45,7 @@ public class SelectedUI : MonoBehaviour
     /// <summary>
     /// Changes the material of the Image Projector
     /// </summary>
-    public void selectNewMatrial(Material pMat, Sprite pMaterialThumbnail)
+    public void SelectNewMatrial(Material pMat, Sprite pMaterialThumbnail)
     {
         _selectedImage.ChangeMaterial(pMat);
         _selectedImage.materialThumbnail = pMaterialThumbnail;
@@ -53,11 +54,45 @@ public class SelectedUI : MonoBehaviour
 
 
     /// <summary>
-    /// Updates the selected object
+    /// Change the Image Projector into a video
     /// </summary>
-    private void OnSelectedObjectChanged(object sender, SelectedImageEventArgs e)
+    /// <param name="pURL"></param>
+    public void SelectNewVideo(string pURL)
     {
-        _selectedImage = e.imageProjector;
+        _selectedImage.ChangeMaterial(new Material(Shader.Find("HDRP/Lit"))); 
+
+        VideoPlayer player = _selectedImage.SetVideo(pURL);
+        player.sendFrameReadyEvents = true;
+        player.frameReady += OnFrameReady;
+
+        _materialSelector.SetActive(false);
+    }
+
+
+    /// <summary>
+    /// Get the frame from a VideoPlayer and create a thumbnail
+    /// </summary>
+    /// <remarks> 
+    /// This is only used for the first frame, after that we unsubscribe and disable the event
+    /// The frameReady event is really heavy on the cpu. 
+    /// </remarks>
+    private void OnFrameReady(VideoPlayer psource, long index)
+    {
+        Texture videoTexture = psource.texture;
+        Texture2D thumbnail = new Texture2D(videoTexture.width, videoTexture.height, TextureFormat.RGBA32, false);
+
+        RenderTexture renderTexture = new RenderTexture(videoTexture.width, videoTexture.height, 32);
+        Graphics.Blit(videoTexture, renderTexture);
+        RenderTexture.active = renderTexture;
+
+        thumbnail.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        thumbnail.Apply();
+        RenderTexture.active = null;
+
+        Sprite sprite = Sprite.Create(thumbnail, new Rect(0, 0, psource.width, psource.height), new Vector2(0.5f, 0.5f));
+        _selectedImage.materialThumbnail = sprite;
+        psource.frameReady -= OnFrameReady;
+        psource.sendFrameReadyEvents = false;
     }
 
 
@@ -67,6 +102,15 @@ public class SelectedUI : MonoBehaviour
     public void ToggleMaterialSelection()
     {
         _materialSelector.SetActive(!_materialSelector.activeSelf);
+    }
+
+
+    /// <summary>
+    /// Updates the selected object
+    /// </summary>
+    private void onSelectedObjectChanged(object sender, SelectedImageEventArgs e)
+    {
+        _selectedImage = e.imageProjector;
     }
 
 

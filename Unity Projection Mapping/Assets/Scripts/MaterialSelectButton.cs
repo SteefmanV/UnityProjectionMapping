@@ -13,6 +13,6 @@ public class MaterialSelectButton : MonoBehaviour
 
     public void SelectMaterial()
     {
-        FindObjectOfType<SelectedUI>().selectNewMatrial(material, _matThumb);
+        FindObjectOfType<SelectedUI>().SelectNewMatrial(material, _matThumb);
     }
 }

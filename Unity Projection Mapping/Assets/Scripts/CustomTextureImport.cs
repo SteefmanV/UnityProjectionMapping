@@ -1,9 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.IO;
 using UnityEngine;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 public class CustomTextureImport : MonoBehaviour
@@ -26,7 +22,7 @@ public class CustomTextureImport : MonoBehaviour
         {
             _imageMaterial.SetTexture("_BaseColorMap", texture);
             Sprite materialThumnail = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100);
-            FindObjectOfType<SelectedUI>().selectNewMatrial(_imageMaterial, materialThumnail);
+            FindObjectOfType<SelectedUI>().SelectNewMatrial(_imageMaterial, materialThumnail);
         }
     }
 

@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.Video;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshRenderer))]
@@ -26,6 +29,7 @@ public class ImageProjector : MonoBehaviour
 
     private Mesh _mesh;
     private PolygonCollider2D _collider = null;
+    private VideoPlayer _videoPlayer = null;
 
     // Mesh data:
     private List<Vector3> _vertices = new List<Vector3>();
@@ -36,10 +40,10 @@ public class ImageProjector : MonoBehaviour
     private int _tris = 0;
     private int _quadSize = 0;
 
-
     private void Awake()
     {
         _collider = GetComponent<PolygonCollider2D>();
+        _videoPlayer = GetComponent<VideoPlayer>();
         UpdateDragPositions();
         _transformHandle.TransformChanged += OnTransformChanged;
     }
@@ -80,10 +84,26 @@ public class ImageProjector : MonoBehaviour
     /// </summary>
     public void ChangeMaterial(Material pMat)
     {
+        _videoPlayer.Stop();
         MeshRenderer meshRend = GetComponent<MeshRenderer>();
         meshRend.material = pMat;
     }
 
+
+    /// <summary>
+    /// Sets the video in the videoplayer and returns the thumbnail of the video
+    /// </summary>
+    /// <param name="pURL"></param>
+    public VideoPlayer SetVideo(string pURL)
+    {      
+        _videoPlayer.targetMaterialProperty = "_BaseColorMap";
+        _videoPlayer.targetMaterialRenderer = GetComponent<MeshRenderer>();
+        _videoPlayer.url = pURL;
+        _videoPlayer.time = 0;
+        _videoPlayer.Play();
+
+        return _videoPlayer;
+    }
 
     /// <summary>
     /// Updates the drag point position based on the transform translation
@@ -137,13 +157,13 @@ public class ImageProjector : MonoBehaviour
         Vector3 intersection3 = Rectangle.LineIntersection(quadCenter, vanishPoint2, pRec.pointB, pRec.pointC);     // |    O    |  V2 = Where line A-B and C-D intersect
         Vector3 intersection4 = Rectangle.LineIntersection(quadCenter, vanishPoint2, pRec.pointA, pRec.pointD);     // | /     \ |
                                                                                                                     // D ------- C
-        //if (_drawGizmos)
-        //{
-        //    Gizmos.color = Color.green;
-        //    Gizmos.DrawLine(intersection1, intersection2);
-        //    Gizmos.DrawLine(intersection3, intersection4);
-        //    pRec.DrawGizmoOutline();
-        //}
+                                                                                                                    //if (_drawGizmos)
+                                                                                                                    //{
+                                                                                                                    //    Gizmos.color = Color.green;
+                                                                                                                    //    Gizmos.DrawLine(intersection1, intersection2);
+                                                                                                                    //    Gizmos.DrawLine(intersection3, intersection4);
+                                                                                                                    //    pRec.DrawGizmoOutline();
+                                                                                                                    //}
 
         // Subdivide rectangle in 4 more rectangles
         Vector2 newUVRange = pUVRange / 2;
