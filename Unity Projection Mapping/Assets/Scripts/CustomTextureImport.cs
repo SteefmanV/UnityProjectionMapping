@@ -56,16 +56,12 @@ public class CustomTextureImport : MonoBehaviour
     private Texture2D loadFileIntoTexture(string pFilePath)
     {
         Texture2D texture = new Texture2D(1,1); // Create default texture, size doesn't matter
-        Debug.Log("file path: " + pFilePath);
 
         if (File.Exists(pFilePath))
         {
             byte[] fileData = File.ReadAllBytes(pFilePath);
-            Debug.Log("File Data: " + pFilePath);
             texture.LoadImage(fileData); // Loads image data and resets the texture size
         }
-
-        Debug.Log("Texture: " + texture);
 
         return texture;
     }

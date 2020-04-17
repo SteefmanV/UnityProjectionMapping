@@ -167,7 +167,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 39.40387, y: 11.707153}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 140, y: 140}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &803882284
@@ -456,6 +456,7 @@ GameObject:
   - component: {fileID: 7081451997159107367}
   - component: {fileID: 7081451997159107366}
   - component: {fileID: 7081451997159107365}
+  - component: {fileID: 8993805405219100018}
   m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
@@ -547,6 +548,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &8993805405219100018
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7081451997159107371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57dabaa8e1db0e245b50bc274e86e77f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7081451997274466043
 GameObject:
   m_ObjectHideFlags: 0
@@ -788,10 +801,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32d871291eb96b3488382789f9a26d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  topLeft: {x: 801.14496, y: 701.14825, z: 0}
-  topRight: {x: 1198.7523, y: 700.2649, z: 0}
-  bottomLeft: {x: 802.4331, y: 404.92126, z: 0}
-  bottomRight: {x: 1196.9885, y: 402.7743, z: 0}
+  _transformHandle: {fileID: 803882284}
+  topLeft: {x: 0, y: 0, z: 0}
+  topRight: {x: 0, y: 0, z: 0}
+  bottomLeft: {x: 0, y: 0, z: 0}
+  bottomRight: {x: 0, y: 0, z: 0}
   dragPoints:
   - {fileID: 7081451997274466036}
   - {fileID: 7081451998628273491}
@@ -800,7 +814,6 @@ MonoBehaviour:
   materialThumbnail: {fileID: 21300000, guid: 68a2aaac70a7e424d9d1e5fffd7e8ba1, type: 3}
   _drawGizmos: 0
   _subdevisionIteration: 3
-  _transformHandle: {fileID: 803882284}
 --- !u!60 &3007601009246956150
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -826,10 +839,10 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 801.14496, y: 701.14825}
-      - {x: 1198.7523, y: 700.2649}
-      - {x: 1196.9885, y: 402.7743}
-      - {x: 802.4331, y: 404.92126}
+    - - {x: 0, y: 0}
+      - {x: 0, y: 0}
+      - {x: 0, y: 0}
+      - {x: 0, y: 0}
 --- !u!1 &7081451998556127763
 GameObject:
   m_ObjectHideFlags: 0
