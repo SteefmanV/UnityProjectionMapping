@@ -44,6 +44,7 @@ public class ImageProjector : MonoBehaviour
     {
         _collider = GetComponent<PolygonCollider2D>();
         _videoPlayer = GetComponent<VideoPlayer>();
+
         UpdateDragPositions();
         _transformHandle.TransformChanged += OnTransformChanged;
     }
@@ -84,9 +85,10 @@ public class ImageProjector : MonoBehaviour
     /// </summary>
     public void ChangeMaterial(Material pMat)
     {
+        Material newMat = new Material(pMat);
         _videoPlayer.Stop();
         MeshRenderer meshRend = GetComponent<MeshRenderer>();
-        meshRend.material = pMat;
+        meshRend.material = newMat;
     }
 
 
