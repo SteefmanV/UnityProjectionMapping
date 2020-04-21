@@ -1,4 +1,6 @@
 # Unity Projection Mapping Tool
+[![Download Laps](https://img.shields.io/badge/Download-Latest_Build_.zip-purple?style=for-the-badge)](https://github.com/SteefmanV/UnityProjectionMapping/releases/tag/0.1-Release)
+
 This repository contains a Build and the Unity Project of the Projection Mapping Tool.
 
 ![](Images/StefanProjectionMappingAfter.png)
